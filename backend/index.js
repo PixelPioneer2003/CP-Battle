@@ -14,7 +14,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
@@ -22,10 +23,10 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 const axios = require("axios");
@@ -129,11 +130,14 @@ io.on("connection", (socket) => {
 
 async function checkIfSolved(handle, contestId, index) {
   try {
-    const res = await axios.get(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=20`);
-    return res.data.result.some(sub =>
-      sub.problem.contestId == contestId &&
-      sub.problem.index == index &&
-      sub.verdict === "OK"
+    const res = await axios.get(
+      `https://codeforces.com/api/user.status?handle=${handle}&from=1&count=20`
+    );
+    return res.data.result.some(
+      (sub) =>
+        sub.problem.contestId == contestId &&
+        sub.problem.index == index &&
+        sub.verdict === "OK"
     );
   } catch (err) {
     console.error("Error checking submissions:", err.message);
@@ -158,22 +162,21 @@ function monitorMatch(roomId, h1, h2, u1, u2, contestId, index) {
       const loser = s1 ? u2 : u1;
 
       const WIN_POINTS = 10;
-const LOSE_POINTS = -5;
+      const LOSE_POINTS = -5;
 
-const matchResultPayload = {
-  winner,
-  loser,
-  results: {
-    [winner]: { points: WIN_POINTS },
-    [loser]: { points: LOSE_POINTS },
-  }
-};
+      const matchResultPayload = {
+        winner,
+        loser,
+        results: {
+          [winner]: { points: WIN_POINTS },
+          [loser]: { points: LOSE_POINTS },
+        },
+      };
 
-    await Match.updateOne({ roomId }, { winner });
+      await Match.updateOne({ roomId }, { winner });
 
-    io.to(userSocketMap[u1]).emit("matchResult", matchResultPayload);
-    io.to(userSocketMap[u2]).emit("matchResult", matchResultPayload);
-
+      io.to(userSocketMap[u1]).emit("matchResult", matchResultPayload);
+      io.to(userSocketMap[u2]).emit("matchResult", matchResultPayload);
     }
   }, 1000);
 

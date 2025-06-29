@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import socket from "../socket";
 import { useParams, useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ function MatchPage() {
   const [problem, setProblem] = useState(null);
   const [timer, setTimer] = useState(0);
   const [maxTime, setMaxTime] = useState(0);
-  const intervalRef=useRef(null);
+  const intervalRef = useRef(null);
 
   const username = localStorage.getItem("username");
   const handle = localStorage.getItem("cfHandle");
@@ -32,36 +32,35 @@ function MatchPage() {
       handle,
     });
 
- const handleStartTimer = ({ maxTime }) => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    const handleStartTimer = ({ maxTime }) => {
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
 
-    setMaxTime(maxTime);
-    setTimer(maxTime);
+      setMaxTime(maxTime);
+      setTimer(maxTime);
 
-    intervalRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
+      intervalRef.current = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    };
 
     const handleMatchResult = ({ winner, loser, results }) => {
-  navigate("/match-result", {
-    state: {
-      winner,
-      loser,
-      results
-    }
-  });
-};
-
+      navigate("/match-result", {
+        state: {
+          winner,
+          loser,
+          results,
+        },
+      });
+    };
 
     socket.on("startTimer", handleStartTimer);
     socket.on("matchResult", handleMatchResult);
@@ -89,7 +88,9 @@ function MatchPage() {
   useEffect(() => {
     const fetchMatch = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/match/${roomId}`);
+        const res = await axios.get(
+          `https://cp-battle-backend.onrender.com/api/match/${roomId}`
+        );
         setProblem(res.data.problem);
       } catch (err) {
         console.error("Failed to load match:", err.message);
@@ -112,8 +113,12 @@ function MatchPage() {
 
         {problem ? (
           <div className="problem-section">
-            <p><strong>Problem:</strong> {problem.name}</p>
-            <p><strong>Rating:</strong> {problem.rating}</p>
+            <p>
+              <strong>Problem:</strong> {problem.name}
+            </p>
+            <p>
+              <strong>Rating:</strong> {problem.rating}
+            </p>
             <a
               href={problem.link}
               target="_blank"
@@ -140,7 +145,11 @@ function MatchPage() {
           Mark as Done
         </button>
 
-        {opponentDone && <p className="opponent-done">✅ Opponent has completed the problem!</p>}
+        {opponentDone && (
+          <p className="opponent-done">
+            ✅ Opponent has completed the problem!
+          </p>
+        )}
       </div>
     </div>
   );

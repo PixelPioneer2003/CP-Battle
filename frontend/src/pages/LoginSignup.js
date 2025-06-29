@@ -14,9 +14,11 @@ function LoginSignup() {
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");
     e.preventDefault();
+    // const BASE_URL = "http://localhost:5000";
+    const BASE_URL = "https://cp-battle-backend.onrender.com";
     const endpoint = isLogin
-      ? "http://localhost:5000/api/login"
-      : "http://localhost:5000/api/signup";
+      ? `${BASE_URL}/api/login`
+      : `${BASE_URL}/api/signup`;
 
     try {
       console.log("Sending request to " + endpoint);
